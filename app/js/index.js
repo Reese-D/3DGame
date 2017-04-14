@@ -166,9 +166,9 @@ function init() {
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
     //floor
-    makePlaneY(0, - Math.PI/2, "js/textures/floor.jpg");
+    makePlane(0, - Math.PI/2, "js/textures/floor.jpg");
     //roof
-    makePlaneY(500, Math.PI/2, "js/textures/wall.jpg");
+    makePlane(500, Math.PI/2, "js/textures/wall.jpg");
 
     //Creates wall translated on z axis
     makeWall(new THREE.Vector3(0,0,1), -500, 0, "js/textures/wall.jpg");
@@ -179,7 +179,8 @@ function init() {
     makeWall(new THREE.Vector3(1,0,0), -500,  Math.PI/2, "js/textures/wall.jpg");
 
     //create eye
-    makeEye(10, 100);
+    //makeEye(translation axis, rotation axis, translation, rotation, texture, size, vertices)
+    makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), 20, 0, "js/textures/eye2.jpg", 10, 100);
 
 
 
@@ -214,7 +215,7 @@ function makeWall(axis, offset, rot, tex ){
     scene.add(wall);
 }
 
-function makePlaneY(offset, rot, tex){
+function makePlane(offset, rot, tex){
     var planeTex = new THREE.TextureLoader().load(tex);
     planeTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
     planeTex.wrapS = THREE.RepeatWrapping;
@@ -228,9 +229,9 @@ function makePlaneY(offset, rot, tex){
     scene.add( plane )
 }
 
-function makeEye(radius, vertices){
-    var eyeTex = new THREE.TextureLoader().load("js/textures/eye2.jpg", THREE.SphericalRefractionMapping);
-    geometry = new THREE.SphereGeometry(radius,vertices,vertices);
+function makeEye(axis1, axis2, offset, rot, tex, radius, vertices){
+    var eyeTex = new THREE.TextureLoader().load(tex, THREE.SphericalRefractionMapping);
+    geometry = new THREE.SphereGeometry(radius, vertices, vertices);
     // modify UVs to accommodate MatCap texture
     var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
     for ( i = 0; i < faceVertexUvs.length; i ++ ) {
@@ -249,7 +250,8 @@ function makeEye(radius, vertices){
     var eyeball = new THREE.Mesh( geometry, material );
     eyeball.overdraw = true;
     eyeball.castShadow = true;
-    eyeball.translateY(10);
+    eyeball.translateOnAxis(axis1, offset);
+    eyeball.rotateOnAxis(axis2, rot);
     scene.add( eyeball );
     objects.push(eyeball);
 }
