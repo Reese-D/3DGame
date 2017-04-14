@@ -2,7 +2,6 @@
 <html lang="en">
 	<head>
 		<title>three.js - pointerlock controls</title>
-    <script src="js/textures/eye1.jpg"></script>
 		<script src="js/vendor/three.js"></script>
 		<script src="js/controls/PointerLockControls.js"></script>
 		<meta charset="utf-8">
@@ -267,11 +266,36 @@
 				mesh = new THREE.Mesh( geometry, material );
 				scene.add( mesh );
 
-        geometry = new THREE.SphereGeometry(200, 20, 20);
-        material = new THREE.MeshPhongMaterial( { color: 0xff0000, wireframe: true } );
-        mesh = new THREE.Mesh( geometry, material );
-        scene.add( mesh );
-				// objects
+
+				var eyeTex = new THREE.TextureLoader().load("js/textures/eye3.png", THREE.SphericalRefractionMapping);
+				//var eyeTex = new THREE.TextureLoader().load("js/textures/eye2.png", THREE.SphericalRefractionMapping);
+				geometry = new THREE.SphereGeometry(10,100,100);
+
+
+				// modify UVs to accommodate MatCap texture
+		   	var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
+		 	  for ( i = 0; i < faceVertexUvs.length; i ++ ) {
+
+		 		    var uvs = faceVertexUvs[ i ];
+		 		    var face = geometry.faces[ i ];
+
+		 		    for ( var j = 0; j < 3; j ++ ) {
+
+		 			      uvs[ j ].x = face.vertexNormals[ j ].x * .5 + .5;
+		 			      uvs[ j ].y = face.vertexNormals[ j ].y * .5 + .5;
+
+		 		    }
+			  }
+
+
+				material = new THREE.MeshPhongMaterial({map: eyeTex});
+			  var eyeball = new THREE.Mesh( geometry, material );
+			  eyeball.overdraw = true;
+			  eyeball.castShadow = true;
+				eyeball.translateY(10);
+			  scene.add( eyeball );
+
+
 
 
 				geometry = new THREE.BoxGeometry( 20, 20, 20 );
