@@ -88,7 +88,7 @@ var velocity = new THREE.Vector3();
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1200 );
 
     scene = new THREE.Scene();
     //scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
@@ -180,6 +180,18 @@ function init() {
     floor.rotateX( - Math.PI /2);
     scene.add( floor );
 
+    var roofTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
+    roofTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
+    roofTex.wrapS = THREE.RepeatWrapping;
+    roofTex.wrapT = THREE.RepeatWrapping;
+    var roof = new THREE.Mesh (
+        new THREE.PlaneGeometry(1000, 1000, 100, 100),
+        new THREE.MeshPhongMaterial({ map: roofTex})
+    );
+    roof.translateY(500);
+    roof.rotateX(Math.PI /2);
+    scene.add( roof );
+
     //wall infront of staring position
     var wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
     wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
@@ -207,9 +219,9 @@ function init() {
     wall.rotateY(Math.PI);
     scene.add(wall);
 
-
     //wall right of starting position
     wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
+
     wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
     wallTex.wrapS = THREE.RepeatWrapping;
     wallTex.wrapT = THREE.RepeatWrapping;
@@ -236,33 +248,6 @@ function init() {
     wall.translateY(250);
     wall.rotateY(Math.PI/2);
     scene.add(wall);
-
-    /*
-    geometry = new THREE.PlaneGeometry( 500, 500, 100, 100 );
-    geometry.rotateX( - Math.PI / 2 );
-
-    for ( var i = 0, l = geometry.vertices.length; i < l; i ++ ) {
-
-	      var vertex = geometry.vertices[ i ];
-	      vertex.x += Math.random() * 20 - 10;
-	      vertex.y += Math.random() * 2;
-	      vertex.z += Math.random() * 20 - 10;
-
-    }
-
-    for ( var i = 0, l = geometry.faces.length; i < l; i ++ ) {
-
-	var face = geometry.faces[ i ];
-        face.vertexColors[ 0 ] = new THREE.Color(0xA9A9A9);
-        face.vertexColors[ 1 ] = new THREE.Color(0x000000);
-        face.vertexColors[ 2 ] = new THREE.Color(0xA9A9A9);
-    }
-
-    material = new THREE.MeshPhongMaterial( { vertexColors: THREE.VertexColors } );
-
-    mesh = new THREE.Mesh( geometry, material );
-    scene.add( mesh );
-    */
 
     var eyeTex = new THREE.TextureLoader().load("js/textures/eye2.jpg", THREE.SphericalRefractionMapping);
     geometry = new THREE.SphereGeometry(10,100,100);
