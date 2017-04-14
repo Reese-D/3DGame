@@ -88,7 +88,7 @@ var velocity = new THREE.Vector3();
 
 function init() {
 
-    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1200 );
+    camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1500 );
 
     scene = new THREE.Scene();
     //scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
@@ -165,117 +165,21 @@ function init() {
 
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
 
-    // floor
+    //floor
+    makePlaneY(0, - Math.PI/2, "js/textures/floor.jpg");
+    //roof
+    makePlaneY(500, Math.PI/2, "js/textures/wall.jpg");
 
+    //Creates wall translated on z axis
+    makeWallZ(-500, 0, "js/textures/wall.jpg");
+    makeWallZ(500, Math.PI, "js/textures/wall.jpg");
 
+    //makes wall translated on x axis
+    makeWallX(500, -Math.PI/2, "js/textures/wall.jpg");
+    makeWallX(-500, Math.PI/2, "js/textures/wall.jpg");
 
-    var floorTex = new THREE.TextureLoader().load("js/textures/floor.jpg");
-    floorTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    floorTex.wrapS = THREE.RepeatWrapping;
-    floorTex.wrapT = THREE.RepeatWrapping;
-    var floor = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 1000, 100, 100),
-        new THREE.MeshPhongMaterial({ map: floorTex})
-    );
-    floor.rotateX( - Math.PI /2);
-    scene.add( floor );
-
-    var roofTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
-    roofTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    roofTex.wrapS = THREE.RepeatWrapping;
-    roofTex.wrapT = THREE.RepeatWrapping;
-    var roof = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 1000, 100, 100),
-        new THREE.MeshPhongMaterial({ map: roofTex})
-    );
-    roof.translateY(500);
-    roof.rotateX(Math.PI /2);
-    scene.add( roof );
-
-    //wall infront of staring position
-    var wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
-    wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    wallTex.wrapS = THREE.RepeatWrapping;
-    wallTex.wrapT = THREE.RepeatWrapping;
-    var wall = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 500, 100, 100),
-        new THREE.MeshPhongMaterial({ map: wallTex})
-    );
-    wall.translateZ(-500);
-    wall.translateY(250);
-    scene.add( wall );
-
-    //wall behind starting position
-    wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
-    wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    wallTex.wrapS = THREE.RepeatWrapping;
-    wallTex.wrapT = THREE.RepeatWrapping;
-    wall = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 500, 100, 100),
-        new THREE.MeshPhongMaterial({ map: wallTex})
-    );
-    wall.translateZ(500);
-    wall.translateY(250);
-    wall.rotateY(Math.PI);
-    scene.add(wall);
-
-    //wall right of starting position
-    wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
-
-    wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    wallTex.wrapS = THREE.RepeatWrapping;
-    wallTex.wrapT = THREE.RepeatWrapping;
-    wall = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 500, 100, 100),
-        new THREE.MeshPhongMaterial({ map: wallTex})
-    );
-    wall.translateX(500);
-    wall.translateY(250);
-    wall.rotateY(-Math.PI/2);
-    scene.add(wall);
-
-
-    //wall left of starting position
-    wallTex = new THREE.TextureLoader().load("js/textures/wall.jpg");
-    wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
-    wallTex.wrapS = THREE.RepeatWrapping;
-    wallTex.wrapT = THREE.RepeatWrapping;
-    wall = new THREE.Mesh (
-        new THREE.PlaneGeometry(1000, 500, 100, 100),
-        new THREE.MeshPhongMaterial({ map: wallTex})
-    );
-    wall.translateX(-500);
-    wall.translateY(250);
-    wall.rotateY(Math.PI/2);
-    scene.add(wall);
-
-    var eyeTex = new THREE.TextureLoader().load("js/textures/eye2.jpg", THREE.SphericalRefractionMapping);
-    geometry = new THREE.SphereGeometry(10,100,100);
-
-
-    // modify UVs to accommodate MatCap texture
-    var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
-    for ( i = 0; i < faceVertexUvs.length; i ++ ) {
-
-	var uvs = faceVertexUvs[ i ];
-	var face = geometry.faces[ i ];
-
-	for ( var j = 0; j < 3; j ++ ) {
-
-	    uvs[ j ].x = face.vertexNormals[ j ].x * .5 + .5;
-	    uvs[ j ].y = face.vertexNormals[ j ].y * .5 + .5;
-
-	}
-    }
-
-
-    material = new THREE.MeshPhongMaterial({map: eyeTex});
-    var eyeball = new THREE.Mesh( geometry, material );
-    eyeball.overdraw = true;
-    eyeball.castShadow = true;
-    eyeball.translateY(10);
-    scene.add( eyeball );
-
+    //create eye
+    makeEye(10, 100);
 
 
 
@@ -293,6 +197,84 @@ function init() {
     window.addEventListener( 'resize', onWindowResize, false );
 
 }
+
+
+function makeWallX(offset, rot, tex){
+  //wall left of starting position
+  var wallTex = new THREE.TextureLoader().load(tex);
+  wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
+  wallTex.wrapS = THREE.RepeatWrapping;
+  wallTex.wrapT = THREE.RepeatWrapping;
+  var wall = new THREE.Mesh (
+      new THREE.PlaneGeometry(1000, 500, 100, 100),
+      new THREE.MeshPhongMaterial({ map: wallTex})
+  );
+  wall.translateX(offset);
+  wall.translateY(250);
+  wall.rotateY(rot);
+  scene.add(wall);
+
+}
+
+function makeWallZ(offset, rot, tex){
+  //wall left of starting position
+  var wallTex = new THREE.TextureLoader().load(tex);
+  wallTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
+  wallTex.wrapS = THREE.RepeatWrapping;
+  wallTex.wrapT = THREE.RepeatWrapping;
+  var wall = new THREE.Mesh (
+      new THREE.PlaneGeometry(1000, 500, 100, 100),
+      new THREE.MeshPhongMaterial({ map: wallTex})
+  );
+  wall.translateZ(offset);
+  wall.translateY(250);
+  wall.rotateY(rot);
+  scene.add(wall);
+
+}
+
+function makePlaneY(offset, rot, tex){
+  var planeTex = new THREE.TextureLoader().load(tex);
+  planeTex.repeat.set(6,6);     // repeat the texture 6x in both s- and t- directions
+  planeTex.wrapS = THREE.RepeatWrapping;
+  planeTex.wrapT = THREE.RepeatWrapping;
+  var plane = new THREE.Mesh (
+      new THREE.PlaneGeometry(1000, 1000, 100, 100),
+      new THREE.MeshPhongMaterial({ map: planeTex})
+  );
+  plane.translateY( offset )
+  plane.rotateX( rot );
+  scene.add( plane )
+}
+
+function makeEye(radius, vertices){
+  var eyeTex = new THREE.TextureLoader().load("js/textures/eye2.jpg", THREE.SphericalRefractionMapping);
+  geometry = new THREE.SphereGeometry(radius,vertices,vertices);
+  // modify UVs to accommodate MatCap texture
+  var faceVertexUvs = geometry.faceVertexUvs[ 0 ];
+  for ( i = 0; i < faceVertexUvs.length; i ++ ) {
+
+      var uvs = faceVertexUvs[ i ];
+      var face = geometry.faces[ i ];
+
+      for ( var j = 0; j < 3; j ++ ) {
+
+          uvs[ j ].x = face.vertexNormals[ j ].x * .5 + .5;
+          uvs[ j ].y = face.vertexNormals[ j ].y * .5 + .5;
+
+      }
+  }
+  material = new THREE.MeshPhongMaterial({map: eyeTex});
+  var eyeball = new THREE.Mesh( geometry, material );
+  eyeball.overdraw = true;
+  eyeball.castShadow = true;
+  eyeball.translateY(10);
+  scene.add( eyeball );
+
+}
+
+
+
 
 function onWindowResize() {
 
