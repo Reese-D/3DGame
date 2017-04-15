@@ -4,6 +4,7 @@ var geometry, material, mesh;
 var controls;
 
 var objects = [];
+var bullet = [];
 var structures = [];
 var raycaster;
 
@@ -82,7 +83,8 @@ var moveBackward = false;
 var moveLeft = false;
 var moveRight = false;
 var canJump = false;
-
+var shoot = false;
+var shot = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 
@@ -123,10 +125,10 @@ function init() {
 	    moveRight = true;
 	    break;
 
-	case 32: // space
-	    if ( canJump === true ) velocity.y += 350;
-	    canJump = false;
-	    break;
+	//case 32: // space
+	//    if ( canJump === true ) velocity.y += 350;
+	//    canJump = false;
+	//    break;
 
 	}
 
@@ -156,6 +158,9 @@ function init() {
 	    moveRight = false;
 	    break;
 
+  case 32: //space
+      shoot = true;
+      break;
 	}
 
     };
@@ -180,8 +185,8 @@ function init() {
 
     //create eye
     //makeEye(translation axis, rotation axis, translation, rotation, texture, size, vertices)
+    makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), 20, 0, "js/textures/bullet.jpg", .2, 100);
     makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), 20, 0, "js/textures/eye2.jpg", 10, 100);
-
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -253,7 +258,11 @@ function makeEye(axis1, axis2, offset, rot, tex, radius, vertices){
     eyeball.translateOnAxis(axis1, offset);
     eyeball.rotateOnAxis(axis2, rot);
     scene.add( eyeball );
-    objects.push(eyeball);
+    if(tex == "js/textures/bullet.jpg"){
+      bullet.push(eyeball);
+    }else{
+      objects.push(eyeball);
+    }
 }
 
 
@@ -272,50 +281,68 @@ function animate() {
 
     requestAnimationFrame( animate );
 
+    var cameraDir = new THREE.Vector3();
+    var shotDir = new THREE.Vector3();
+    camera.getWorldDirection( cameraDir);
     if ( controlsEnabled ) {
-	raycaster.ray.origin.copy( controls.getObject().position );
-	raycaster.ray.origin.y -= 10;
+	     raycaster.ray.origin.copy( controls.getObject().position );
+       raycaster.ray.origin.y -= 10;
 
-	var intersections = raycaster.intersectObjects( objects );
+       var intersections = raycaster.intersectObjects( objects );
+	     var isOnObject = intersections.length > 0;
 
-	var isOnObject = intersections.length > 0;
+	     var time = performance.now();
+       var delta = ( time - prevTime ) / 1000;
 
-	var time = performance.now();
-	var delta = ( time - prevTime ) / 1000;
+       velocity.x -= velocity.x * 10.0 * delta;
+	     velocity.z -= velocity.z * 10.0 * delta;
 
-	velocity.x -= velocity.x * 10.0 * delta;
-	velocity.z -= velocity.z * 10.0 * delta;
+	     velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+       if ( moveForward ) velocity.z -= 400.0 * delta;
+	     if ( moveBackward ) velocity.z += 400.0 * delta;
 
-	if ( moveForward ) velocity.z -= 400.0 * delta;
-	if ( moveBackward ) velocity.z += 400.0 * delta;
+       if ( moveLeft ) velocity.x -= 400.0 * delta;
+	     if ( moveRight ) velocity.x += 400.0 * delta;
 
-	if ( moveLeft ) velocity.x -= 400.0 * delta;
-	if ( moveRight ) velocity.x += 400.0 * delta;
+       if ( isOnObject === true ) {
+	        velocity.y = Math.max( 0, velocity.y );
 
-	if ( isOnObject === true ) {
-	    velocity.y = Math.max( 0, velocity.y );
+	        canJump = true;
+	     }
 
-	    canJump = true;
-	}
+	     controls.getObject().translateX( velocity.x * delta );
+       controls.getObject().translateY( velocity.y * delta );
+       controls.getObject().translateZ( velocity.z * delta );
 
-	controls.getObject().translateX( velocity.x * delta );
-	controls.getObject().translateY( velocity.y * delta );
-	controls.getObject().translateZ( velocity.z * delta );
+	     if ( controls.getObject().position.y < 10 ) {
 
-	if ( controls.getObject().position.y < 10 ) {
+	        velocity.y = 0;
+	        controls.getObject().position.y = 10;
 
-	    velocity.y = 0;
-	    controls.getObject().position.y = 10;
+	        canJump = true;
 
-	    canJump = true;
+	    }
 
-	}
-
-	prevTime = time;
+	    prevTime = time;
 
     }
+    if(shoot === true && shot === false){
+        shotDir = cameraDir;
+        shoot = false;
+        shot = true;
+    }
+    if(shot === true){
+        bullet[0].translateOnAxis(cameraDir, 2);
+    }else{
+      bullet[0].position.x = controls.getObject().position.x;
+      bullet[0].position.y = controls.getObject().position.y;
+      bullet[0].position.z = controls.getObject().position.z;
+      bullet[0].translateOnAxis(cameraDir, 3);
+    }
+    console.log(shoot);
+    console.log(shot);
+
 
     renderer.render( scene, camera );
 
