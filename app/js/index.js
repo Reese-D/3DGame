@@ -99,6 +99,7 @@ scoreboard.style.position = 'absolute';
 scoreboard.style.width = 100;
 scoreboard.style.height = 100;
 //scoreboard.style.backgroundColor = "blue";
+scoreboard.style.color = "gray"
 scoreboard.style.top = 20 + 'px';
 scoreboard.style.left = 20 + 'px';
 document.body.appendChild(scoreboard);
