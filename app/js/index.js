@@ -126,12 +126,6 @@ function init() {
 	case 68: // d
 	    moveRight = true;
 	    break;
-
-	    //case 32: // space
-	    //    if ( canJump === true ) velocity.y += 350;
-	    //    canJump = false;
-	    //    break;
-
 	}
 
     };
@@ -354,7 +348,6 @@ function animate() {
 
 	var intersections = raycaster.intersectObjects( objects );
 	//console.log(objects[0]);
-	var isOnObject = intersections.length > 0;
 
 	var time = performance.now();
 	var delta = ( time - prevTime ) / 1000;
@@ -370,12 +363,7 @@ function animate() {
 	if ( moveLeft ) velocity.x -= 400.0 * delta;
 	if ( moveRight ) velocity.x += 400.0 * delta;
 
-	if ( isOnObject === true ) {
-	    velocity.y = Math.max( 0, velocity.y );
-      if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
-	    canJump = true;
-	}
 
 	controls.getObject().translateX( velocity.x * delta );
 	controls.getObject().translateY( velocity.y * delta );
@@ -472,7 +460,6 @@ function animate() {
         bullet[0].velocity.y = 0;
         bullet[0].velocity.z = 0;
         bullet[0].bounce = 0;
-        //split(objects[0]);
     }
     if(shot === true){
       //bullet[0].position.y = controls.getObject().position.y;
