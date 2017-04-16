@@ -463,15 +463,15 @@ function animate() {
     }
     if(shot === true){
       //bullet[0].position.y = controls.getObject().position.y;
-      if(bullet[0].position.x + radius > wallDist || bullet[0].position.x - radius < -wallDist){
+      if(bullet[0].position.x + radius +2 > wallDist || bullet[0].position.x - radius -2 < -wallDist){
     shoot = false;
     shot = false;
 	    }
-	    if(bullet[0].position.y + radius > wallDist || bullet[0].position.y - radius < -wallDist){
+	    if(bullet[0].position.y + radius +2 > wallDist || bullet[0].position.y - radius -2 < -wallDist){
     shoot = false;
     shot = false;
 	    }
-	    if(bullet[0].position.z + radius > wallDist || bullet[0].position.z - radius < -wallDist){
+	    if(bullet[0].position.z + radius +2 > wallDist || bullet[0].position.z - radius -2 < -wallDist){
     shoot = false;
     shot = false;
 	    }
