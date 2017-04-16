@@ -166,7 +166,7 @@ function init() {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
-    wallDist = 250
+    wallDist = 400
 
     //floor
     makePlane(0, - Math.PI/2, "js/textures/floor.jpg");
@@ -183,12 +183,12 @@ function init() {
 
     //create eye
     //makeEye(translation axis, rotation axis, translation, rotation, texture, size, vertices, velocity)
-    makeEye( new THREE.Vector3(1, 1, 0), new THREE.Vector3(0,0,0), 100, 0, "js/textures/eye1.jpg", 10, 20, new THREE.Vector3(-10, 140, 0));
-    makeEye( new THREE.Vector3(-1, 1, 0), new THREE.Vector3(0,0,0), 100, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 150,0));
-    makeEye( new THREE.Vector3(-0.5, 1, 0.5), new THREE.Vector3(0,0,0), 50, 0, "js/textures/eye3.jpg", 10, 20, new THREE.Vector3(-50, 140,0));
-    makeEye( new THREE.Vector3(0.5, 1, 0.5), new THREE.Vector3(0,0,0), 70, 0, "js/textures/eye4.jpg", 10, 20, new THREE.Vector3(-22, 40, 22));
-    makeEye( new THREE.Vector3(-1, 1, -1), new THREE.Vector3(0,0,0), 115, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 200, -25));
-    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 10, 20, new THREE.Vector3(50, 100, 30));
+    makeEye( new THREE.Vector3(1, 1, -1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye1.jpg", 50, 20, new THREE.Vector3(-10, 140, 0));
+    makeEye( new THREE.Vector3(-1, 1, 0), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 50, 20, new THREE.Vector3(10, 150,0));
+    makeEye( new THREE.Vector3(1, 1, 0), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 50, 20, new THREE.Vector3(-50, 140,0));
+    makeEye( new THREE.Vector3(0, 1, -1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye4.jpg", 50, 20, new THREE.Vector3(-22, 40, 22));
+    makeEye( new THREE.Vector3(0, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 50, 20, new THREE.Vector3(10, 200, -25));
+    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 50, 20, new THREE.Vector3(50, 100, 30));
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -217,7 +217,7 @@ function makeWall(axis, offset, rot, tex ){
 	new THREE.MeshPhongMaterial({ map: wallTex})
     );
     wall.translateOnAxis(axis, offset);
-    wall.translateY(wallDist);
+    wall.translateY(wallDist/2);
     wall.rotateY(rot);
     scene.add(wall);
     structures.push(wall);
@@ -318,29 +318,44 @@ function normalizedVector(v){
 }
 
 function split(eyeObj, bulletIndex, eyeIndex){
-  if (eyeObj.geometry.boundingSphere.radius > 8){
-    var x = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
-    var y = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
-    var z = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
+  if (eyeObj.geometry.boundingSphere.radius > 15){
+    //var x = Math.floor(Math.random() * 2500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    //var y = Math.floor(Math.random() * 2500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    //var z = Math.floor(Math.random() * 2500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    var x = eyeObj.velocity.x * 2;
+    var y = eyeObj.velocity.y * 2;
+    var z = eyeObj.velocity.z * 2;
+
     makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(x, y, z));
     objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
-    objects[objects.length-1].translateY(eyeObj.position.y + eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateY(eyeObj.position.y);
     objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
-    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x,-y,-z));
+
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x, y,-z));
+    objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateY(eyeObj.position.y);
+    objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2);
+
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x, y,+z));
+    objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateY(eyeObj.position.y);
+    objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
+
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(+x, y, -z));
     objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
-    objects[objects.length-1].translateY(eyeObj.position.y + eyeObj.geometry.boundingSphere.radius/2);
-    objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
-    scene.remove(objects[eyeIndex]);
-    scene.remove(objects[bulletIndex]);
-    if(bulletIndex < eyeIndex){
-      objects.splice(eyeIndex,1)[0];
-      objects.splice(bulletIndex,1)[0];
-    }else{
-      objects.splice(bulletIndex,1)[0];
-      objects.splice(eyeIndex,1)[0];
-    }
-    bullet.splice(0,1)[0];
+    objects[objects.length-1].translateY(eyeObj.position.y);
+    objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2);
   }
+  scene.remove(objects[eyeIndex]);
+  scene.remove(objects[bulletIndex]);
+  if(bulletIndex < eyeIndex){
+    objects.splice(eyeIndex,1)[0];
+    objects.splice(bulletIndex,1)[0];
+  }else{
+    objects.splice(bulletIndex,1)[0];
+    objects.splice(eyeIndex,1)[0];
+  }
+  bullet.splice(0,1)[0];
 }
 
 function animate() {
@@ -446,7 +461,7 @@ function animate() {
 			split(objects[i], j, i);
 		    }else{
 
-		    	
+
 			// var a1 = objects[i].position.angleTo(objects[j].position)
 			// var v1i = objects[i].velocity.clone()
 			// var max1 = vectorMax(v1i)
@@ -456,12 +471,12 @@ function animate() {
 			var collision1 = objects[i].position.clone().sub(objects[j].position)
 			var dot1 = objects[i].velocity.clone().normalize().dot(collision1.clone().normalize())
 			var v1i = collision1.clone().normalize().multiplyScalar(dot1 * objects[i].velocity.length())
-			
+
 			var collision2 = objects[j].position.clone().sub(objects[i].position)
 			var dot2 = objects[j].velocity.clone().normalize().dot(collision2.clone().normalize())
 			var v2i = collision2.clone().normalize().multiplyScalar(dot2 * objects[j].velocity.length())
 			console.log(v2i)
-			// var a2 = objects[j].position.angleTo(objects[i].position)		    
+			// var a2 = objects[j].position.angleTo(objects[i].position)
 			// var v2i = objects[j].velocity.clone()
 			// var max2 = vectorMax(v2i)
 			// var norm2 = normalizedVector(v2i)
@@ -469,7 +484,7 @@ function animate() {
 
 			objects[i].velocity.sub(v1i);
 			objects[j].velocity.sub(v2i);
-			
+
 			var m1 = objects[i].geometry.boundingSphere.radius
 			var m2 = objects[j].geometry.boundingSphere.radius
 
@@ -527,7 +542,7 @@ function animate() {
     shoot = false;
     shot = false;
 	    }
-      bullet[0].translateOnAxis(cameraDir, 3);
+      bullet[0].translateOnAxis(cameraDir, 5);
     }
 
 
