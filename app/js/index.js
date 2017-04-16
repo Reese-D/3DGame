@@ -354,18 +354,7 @@ function animate() {
 	raycaster.ray.origin.copy( controls.getObject().position );
 	raycaster.ray.origin.y -= 10;
 
-	for(var i = 0; i < objects.length; i++){
-	    for(var j = i; j < objects.length; j++){
-		if(i == j){
-		    continue;
-		}
-		//TODO: if spheresIntersect deflect
-	    }
-	}
-
-
 	var intersections = raycaster.intersectObjects( objects );
-	//console.log(objects[0]);
 
 	var time = performance.now();
 	var delta = ( time - prevTime ) / 1000;
@@ -390,18 +379,10 @@ function animate() {
 	for(var i = 0; i < objects.length; i++){
 	    objects[i].velocity.y -= 9.8 * 10.0 * delta;
       if(bullet.length > 0){bullet[0].velocity.y = 0;}
-	    //objects[i].velocity.y -= 1;
-	    //console.log(9.8 * 100.0 * delta);
-
 	    objects[i].translateX( objects[i].velocity.x * delta );
 	    objects[i].translateY( objects[i].velocity.y * delta );
 	    objects[i].translateZ( objects[i].velocity.z * delta );
 	    var radius = objects[i].geometry.boundingSphere.radius;
-	    // if(objects[i].position.y - radius <= 0){
-	    // 	objects[i].position.y += 2;
-	    //  	objects[i].velocity.y *= -1;
-	    // 	//objects[i].bounce;
-	    // }
 	    var currObj = objects.splice(i, 1)[0];
 
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
@@ -445,14 +426,6 @@ function animate() {
 			shot = false;
 			split(objects[i], j, i);
 		    }else{
-
-		    	
-			// var a1 = objects[i].position.angleTo(objects[j].position)
-			// var v1i = objects[i].velocity.clone()
-			// var max1 = vectorMax(v1i)
-			// var norm1 = normalizedVector(v1i)
-			// v1i.applyAxisAngle(norm1, max1)
-
 			var collision1 = objects[i].position.clone().sub(objects[j].position)
 			var dot1 = objects[i].velocity.clone().normalize().dot(collision1.clone().normalize())
 			var v1i = collision1.clone().normalize().multiplyScalar(dot1 * objects[i].velocity.length())
@@ -460,12 +433,6 @@ function animate() {
 			var collision2 = objects[j].position.clone().sub(objects[i].position)
 			var dot2 = objects[j].velocity.clone().normalize().dot(collision2.clone().normalize())
 			var v2i = collision2.clone().normalize().multiplyScalar(dot2 * objects[j].velocity.length())
-			console.log(v2i)
-			// var a2 = objects[j].position.angleTo(objects[i].position)		    
-			// var v2i = objects[j].velocity.clone()
-			// var max2 = vectorMax(v2i)
-			// var norm2 = normalizedVector(v2i)
-			// v1i.applyAxisAngle(norm2, max2)
 
 			objects[i].velocity.sub(v1i);
 			objects[j].velocity.sub(v2i);
@@ -479,12 +446,9 @@ function animate() {
 			var v2f = p1.add(p2).sub(p3).divideScalar(m1 + m2)
 
 			var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
-			//console.log("initial velocity of 1: ", objects[i].velocity)
-			//console.log("initial velocity of 2: ", objects[j].velocity)
+
 			objects[i].velocity.add(v1f)
 			objects[j].velocity.add(v2f)
-			//console.log("final velocity of 1: ", objects[i].velocity)
-			//console.log("final velocity of 2: ", objects[j].velocity)
 		    }
 
 		}
