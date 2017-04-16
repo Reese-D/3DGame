@@ -107,6 +107,8 @@ document.body.appendChild(scoreboard);
 var score = 0
 
 function init() {
+    wallDist = 400
+    
     topScore = Number(getCookieValue("topScore"))
     if(topScore == undefined){
 	topScore = 0
@@ -120,9 +122,11 @@ function init() {
     scene = new THREE.Scene();
     //scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
 
-    var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-    light.position.set( 0.5, 1, 0.75 );
+    var light = new THREE.PointLight(0xffffff, 1, 0, 1  );
+    var ambient = new THREE.AmbientLight(0xffffff, 0.2);
+    light.position.set( 0, wallDist, 0);
     scene.add( light );
+    scene.add(ambient)
 
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
@@ -188,7 +192,7 @@ function init() {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, 1, 0 ), 0, myRadius  );
-    wallDist = 400
+
 
     //floor
     makePlane(0, - Math.PI/2, "js/textures/floor.jpg");
