@@ -387,27 +387,27 @@ function animate() {
 	    var currObj = objects.splice(i, 1)[0];
 
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
-		if(currObj.velocity.x < 0){
-		    currObj.position.x += 2;
-		}else{
-		    currObj.position.x -= 2;
+		if(currObj.position.x + radius > wallDist){
+		    currObj.position.x = wallDist - radius;
+		}else if(currObj.position.x - radius < -wallDist){
+		    currObj.position.x = -wallDist + radius;
 		}
 		currObj.velocity.x *= -1
 	    }
 	    if(currObj.position.y + radius > wallDist || currObj.position.y - radius <= 0){//currObj.position.y - radius < -wallDist){
-		if(currObj.velocity.y < 0){
-		    currObj.position.y += 2;
-		}else{
-		    currObj.position.y -= 2;
+		if(currObj.position.y + radius > wallDist){
+		    currObj.position.y = wallDist - radius;
+		}else if(currObj.position.y - radius < 0){
+		    currObj.position.y = radius;
 		}
 		currObj.velocity.y *= -1
 
 	    }
 	    if(currObj.position.z + radius > wallDist || currObj.position.z - radius < -wallDist){
-		if(currObj.velocity.z < 0){
-		    currObj.position.z += 2;
-		}else{
-		    currObj.position.z -= 2;
+		if(currObj.position.z + radius > wallDist){
+		    currObj.position.z = wallDist - radius;
+		}else if(currObj.position.z - radius < -wallDist){
+		    currObj.position.z = -wallDist + radius;
 		}
 		currObj.velocity.z *= -1
 	    }
