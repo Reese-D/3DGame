@@ -108,7 +108,7 @@ var score = 0
 
 function init() {
     wallDist = 400
-    
+
     topScore = Number(getCookieValue("topScore"))
     if(topScore == undefined){
 	topScore = 0
@@ -303,7 +303,11 @@ function onWindowResize() {
 }
 
 function spheresIntersect(sphere1, sphere2){
+  try{
     var radiiSum = sphere1.geometry.boundingSphere.radius + sphere2.geometry.boundingSphere.radius;
+  }catch (e) { // non-standard
+     return false;
+}
     var center1 = sphere1.position;
     var center2 = sphere2.position;
     if(center1.distanceTo(center2) < radiiSum){
@@ -439,7 +443,11 @@ function animate() {
 	    objects[i].translateX( objects[i].velocity.x * delta );
 	    objects[i].translateY( objects[i].velocity.y * delta );
 	    objects[i].translateZ( objects[i].velocity.z * delta );
-	    var radius = objects[i].geometry.boundingSphere.radius;
+      try{
+        var radius = objects[i].geometry.boundingSphere.radius;
+      }catch(e){
+        //do nothing
+      }
 	    var currObj = objects.splice(i, 1)[0];
 
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
