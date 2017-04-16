@@ -187,8 +187,8 @@ function init() {
     makeEye( new THREE.Vector3(-1, 1, 0), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 50, 20, new THREE.Vector3(10, 150,0));
     makeEye( new THREE.Vector3(1, 1, 0), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 50, 20, new THREE.Vector3(-50, 140,0));
     makeEye( new THREE.Vector3(0, 1, -1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye4.jpg", 50, 20, new THREE.Vector3(-22, 40, 22));
-    makeEye( new THREE.Vector3(0, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 50, 20, new THREE.Vector3(10, 200, -25));
-    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 50, 20, new THREE.Vector3(50, 100, 30));
+    makeEye( new THREE.Vector3(0, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye6.jpg", 50, 20, new THREE.Vector3(10, 200, -25));
+    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye5.jpg", 50, 20, new THREE.Vector3(50, 100, 30));
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -237,8 +237,7 @@ function makePlane(offset, rot, tex){
     scene.add( plane )
 }
 
-function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity, isBullet = true){
-    var isBullet = false;
+function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity){
     var eyeTex = new THREE.TextureLoader().load(tex, THREE.SphericalRefractionMapping);
     geometry = new THREE.SphereGeometry(radius, vertices, vertices);
     // modify UVs to accommodate MatCap texture
@@ -273,7 +272,6 @@ function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity
     eyeball.velocity = velocity
     eyeball.bounce = velocity.y;
     if(tex == "js/textures/bullet.jpg"){
-  isBullet = true;
   eyeball.geometry.name = "bullet";
 	bullet.push(eyeball);
   objects.push(eyeball);
@@ -389,6 +387,20 @@ function animate() {
 	velocity.z -= velocity.z * 10.0 * delta;
 	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
   if(bullet.length > 0){bullet[0].velocity.y = 0;}
+
+  if(controls.getObject().position.x + 10 > wallDist){
+    controls.getObject().position.x -= 1;
+  }
+  if(controls.getObject().position.x -10 < -wallDist){
+    controls.getObject().position.x += 1;
+  }
+  if(controls.getObject().position.z + 10 > wallDist){
+    controls.getObject().position.z -= 1;
+  }
+  if(controls.getObject().position.z -10 < -wallDist){
+    controls.getObject().position.z += 1;
+  }
+
 
 	if ( moveForward ) velocity.z -= 400.0 * delta;
 	if ( moveBackward ) velocity.z += 400.0 * delta;
