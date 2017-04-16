@@ -382,39 +382,6 @@ function animate() {
 	    }
 	    var currObj = objects.splice(i, 1)[0];
 	    
-	    // if(currObj.zRay.intersectObjects(objects).length > 0 || currObj.zRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.z *= -1;
-	    // 	currObj.position.z -= 1;
-	    // }
-	    
-	    
-	    // if(currObj.nzRay.intersectObjects(objects).length > 0 || currObj.nzRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.z *= -1;
-	    // 	currObj.position.z += 1;
-	    // }
-	    
-	    // if(currObj.yRay.intersectObjects(objects).length > 0 || currObj.yRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.y *= -1;
-	    // 	currObj.position.y -= 1;
-	    // }
-
-	    
-	    // if(currObj.nyRay.intersectObjects(objects).length > 0 || currObj.nyRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.y *= -1;
-	    // 	currObj.position.y += 1;
-	    // }
-
-	    
-	    // if(currObj.xRay.intersectObjects(objects).length > 0 || currObj.xRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.x *= -1;
-	    // 	currObj.position.x -= 1;
-	    // }
-
-	    
-	    // if(currObj.nxRay.intersectObjects(objects).length > 0 || currObj.nxRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.x *= -1;
-	    // 	currObj.position.x += 1;
-	    //}
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
 		currObj.velocity.x *= -1
 	    }
@@ -425,11 +392,12 @@ function animate() {
 		currObj.velocity.z *= -1
 	    }
 	    objects.splice(i, 0, currObj);
-	    //var objectRay = THREE.Raycaster(objects[i].position, normalizedVector(objects[i].velocity), 0, radius+1);
-	    //var collisions = 
-	    //var diff = new THREE.Vector3(100, 200, 300).sub(new THREE.Vector3(100, 210, 290));
-	    //console.log(diff);
-
+	    for(var j = i; j < objects.length; j++){
+		if(i == j){
+		    continue;
+		}
+		
+	    }
 	}
 	if ( controls.getObject().position.y < 10 ) {
 	    velocity.y = 0;
@@ -451,10 +419,6 @@ function animate() {
 	bullet[0].position.z = controls.getObject().position.z;
 	bullet[0].translateOnAxis(cameraDir, 3);
     }
-    console.log(shoot);
-    console.log(shot);
-
-
     renderer.render( scene, camera );
 
 }
