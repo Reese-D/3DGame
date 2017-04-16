@@ -89,7 +89,7 @@ var shoot = false;
 var shot = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
-p
+
 function init() {
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1500 );
@@ -172,7 +172,7 @@ function init() {
 
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
     wallDist = 250
-    
+
     //floor
     makePlane(0, - Math.PI/2, "js/textures/floor.jpg");
     //roof
@@ -194,7 +194,6 @@ function init() {
     makeEye( new THREE.Vector3(0.5, 1, 0.5), new THREE.Vector3(0,0,0), 70, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(-22, 40, 22));
     makeEye( new THREE.Vector3(-1, 1, -1), new THREE.Vector3(0,0,0), 115, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 200, -25));
     makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(50, 100, 30));
-    makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), 20, 0, "js/textures/bullet.jpg", .2, 100,  new THREE.Vector3(50, 100, 30));
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -243,7 +242,7 @@ function makePlane(offset, rot, tex){
     scene.add( plane )
 }
 
-function makeEye(axis1, axis2, offset, rot, tex, radius, vertices, velocity){
+function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity){
     var eyeTex = new THREE.TextureLoader().load(tex, THREE.SphericalRefractionMapping);
     geometry = new THREE.SphereGeometry(radius, vertices, vertices);
     // modify UVs to accommodate MatCap texture
@@ -262,23 +261,24 @@ function makeEye(axis1, axis2, offset, rot, tex, radius, vertices, velocity){
     }
     material = new THREE.MeshPhongMaterial({map: eyeTex});
     var eyeball = new THREE.Mesh( geometry, material );
-    
+
     eyeball.xRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(1,0,0), 0, radius+3);
     eyeball.nxRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(-1,0,0), 0, radius+3);
     eyeball.yRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,1,0), 0, radius+3);
     eyeball.nyRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,-1,0), 0, radius+3);
     eyeball.zRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,0,1), 0, radius+3);
     eyeball.nzRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,0,-1), 0, radius+3);
-    
+
     eyeball.overdraw = true;
     eyeball.castShadow = true;
-    eyeball.translateOnAxis(axis1, offset);
-    eyeball.rotateOnAxis(axis2, rot);
+    eyeball.translateOnAxis(tranAxis, offset);
+    eyeball.rotateOnAxis(rotAxis, rot);
     scene.add( eyeball );
     eyeball.velocity = velocity
     eyeball.bounce = velocity.y;
     if(tex == "js/textures/bullet.jpg"){
 	bullet.push(eyeball);
+  objects.push(eyeball);
     }else{
 	objects.push(eyeball);
     }
@@ -320,13 +320,25 @@ function normalizedVector(v){
     return new THREE.Vector3(v.x / max, v.y / max, v.z/max);
 }
 
+function split(eyeObj){
+  console.log(eyeObj);
+  if (eyeObj.geometry.boundingSphere.radius > 5){
+    var x = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    var y = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    var z = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 100, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(x, y, z));
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 200, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x,-y,-z));
+
+  }
+}
+
 function animate() {
 
     requestAnimationFrame( animate );
 
     var cameraDir = new THREE.Vector3();
     var shotDir = new THREE.Vector3();
-    camera.getWorldDirection( cameraDir);
+    camera.getWorldDirection( cameraDir );
     if ( controlsEnabled ) {
 	raycaster.ray.origin.copy( controls.getObject().position );
 	raycaster.ray.origin.y -= 10;
@@ -340,7 +352,7 @@ function animate() {
 	    }
 	}
 
-	
+
 	var intersections = raycaster.intersectObjects( objects );
 	//console.log(objects[0]);
 	var isOnObject = intersections.length > 0;
@@ -351,6 +363,7 @@ function animate() {
 	velocity.x -= velocity.x * 10.0 * delta;
 	velocity.z -= velocity.z * 10.0 * delta;
 	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+  if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
 	if ( moveForward ) velocity.z -= 400.0 * delta;
 	if ( moveBackward ) velocity.z += 400.0 * delta;
@@ -360,6 +373,7 @@ function animate() {
 
 	if ( isOnObject === true ) {
 	    velocity.y = Math.max( 0, velocity.y );
+      if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
 	    canJump = true;
 	}
@@ -370,6 +384,7 @@ function animate() {
 
 	for(var i = 0; i < objects.length; i++){
 	    objects[i].velocity.y -= 9.8 * 10.0 * delta;
+      if(bullet.length > 0){bullet[0].velocity.y = 0;}
 	    //objects[i].velocity.y -= 1;
 	    //console.log(9.8 * 100.0 * delta);
 	    objects[i].translateX( objects[i].velocity.x * delta );
@@ -381,7 +396,40 @@ function animate() {
 	     	objects[i].velocity.y = objects[i].bounce;
 	    }
 	    var currObj = objects.splice(i, 1)[0];
-	    
+
+	    // if(currObj.zRay.intersectObjects(objects).length > 0 || currObj.zRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.z *= -1;
+	    // 	currObj.position.z -= 1;
+	    // }
+
+
+	    // if(currObj.nzRay.intersectObjects(objects).length > 0 || currObj.nzRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.z *= -1;
+	    // 	currObj.position.z += 1;
+	    // }
+
+	    // if(currObj.yRay.intersectObjects(objects).length > 0 || currObj.yRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.y *= -1;
+	    // 	currObj.position.y -= 1;
+	    // }
+
+
+	    // if(currObj.nyRay.intersectObjects(objects).length > 0 || currObj.nyRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.y *= -1;
+	    // 	currObj.position.y += 1;
+	    // }
+
+
+	    // if(currObj.xRay.intersectObjects(objects).length > 0 || currObj.xRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.x *= -1;
+	    // 	currObj.position.x -= 1;
+	    // }
+
+
+	    // if(currObj.nxRay.intersectObjects(objects).length > 0 || currObj.nxRay.intersectObjects(structures).length > 0){
+	    // 	currObj.velocity.x *= -1;
+	    // 	currObj.position.x += 1;
+	    //}
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
 		currObj.velocity.x *= -1
 	    }
@@ -392,12 +440,11 @@ function animate() {
 		currObj.velocity.z *= -1
 	    }
 	    objects.splice(i, 0, currObj);
-	    for(var j = i; j < objects.length; j++){
-		if(i == j){
-		    continue;
-		}
-		
-	    }
+	    //var objectRay = THREE.Raycaster(objects[i].position, normalizedVector(objects[i].velocity), 0, radius+1);
+	    //var collisions =
+	    //var diff = new THREE.Vector3(100, 200, 300).sub(new THREE.Vector3(100, 210, 290));
+	    //console.log(diff);
+
 	}
 	if ( controls.getObject().position.y < 10 ) {
 	    velocity.y = 0;
@@ -410,15 +457,35 @@ function animate() {
         shotDir = cameraDir;
         shoot = false;
         shot = true;
+        makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), -10, 0, "js/textures/bullet.jpg", 3, 100,  new THREE.Vector3(0,0,0));
+        bullet[0].position.x = controls.getObject().position.x;
+      	bullet[0].position.y = controls.getObject().position.y;
+      	bullet[0].position.z = controls.getObject().position.z;
+        bullet[0].velocity.x = 0;
+        bullet[0].velocity.y = 0;
+        bullet[0].velocity.z = 0;
+        bullet[0].bounce = 0;
+        split(objects[0]);
     }
     if(shot === true){
-        bullet[0].translateOnAxis(cameraDir, 2);
-    }else{
-	bullet[0].position.x = controls.getObject().position.x;
-	bullet[0].position.y = controls.getObject().position.y;
-	bullet[0].position.z = controls.getObject().position.z;
-	bullet[0].translateOnAxis(cameraDir, 3);
+      //bullet[0].position.y = controls.getObject().position.y;
+      if(bullet[0].position.x + radius > wallDist || bullet[0].position.x - radius < -wallDist){
+    shoot = false;
+    shot = false;
+	    }
+	    if(bullet[0].position.y + radius > wallDist || bullet[0].position.y - radius < -wallDist){
+    shoot = false;
+    shot = false;
+	    }
+	    if(bullet[0].position.z + radius > wallDist || bullet[0].position.z - radius < -wallDist){
+    shoot = false;
+    shot = false;
+	    }
+      bullet[0].translateOnAxis(cameraDir, 3);
     }
+
+
+
     renderer.render( scene, camera );
 
 }
