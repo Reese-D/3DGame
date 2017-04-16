@@ -98,7 +98,7 @@ scoreboard.style.position = 'absolute';
 //scoreboard.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
 scoreboard.style.width = 100;
 scoreboard.style.height = 100;
-scoreboard.style.backgroundColor = "blue";
+//scoreboard.style.backgroundColor = "blue";
 scoreboard.style.top = 20 + 'px';
 scoreboard.style.left = 20 + 'px';
 document.body.appendChild(scoreboard);
