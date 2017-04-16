@@ -394,18 +394,18 @@ function animate() {
 	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 	if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
-  if(controls.getObject().position.x + 10 > wallDist){
-    controls.getObject().position.x -= 1;
-  }
-  if(controls.getObject().position.x -10 < -wallDist){
-    controls.getObject().position.x += 1;
-  }
-  if(controls.getObject().position.z + 10 > wallDist){
-    controls.getObject().position.z -= 1;
-  }
-  if(controls.getObject().position.z -10 < -wallDist){
-    controls.getObject().position.z += 1;
-  }
+	if(controls.getObject().position.x + 10 > wallDist){
+	    controls.getObject().position.x -= 1;
+	}
+	if(controls.getObject().position.x -10 < -wallDist){
+	    controls.getObject().position.x += 1;
+	}
+	if(controls.getObject().position.z + 10 > wallDist){
+	    controls.getObject().position.z -= 1;
+	}
+	if(controls.getObject().position.z -10 < -wallDist){
+	    controls.getObject().position.z += 1;
+	}
 
 
 	if ( moveForward ) velocity.z -= 400.0 * delta;
@@ -417,13 +417,18 @@ function animate() {
 	controls.getObject().translateX( velocity.x * delta );
 	controls.getObject().translateY( velocity.y * delta );
 	controls.getObject().translateZ( velocity.z * delta );
+
+	var tmp = new Object();
+	tmp.geometry = new Object();
+	tmp.geometry.boundingSphere = new Object();
+	tmp.geometry.boundingSphere.radius = myRadius;
+	tmp.position = controls.getObject().position.clone()
+	tmp.position.y -= (myRadius/2);
+
 	for(var i = 0; i < objects.length; i++){
-	    var tmp = new Object();
-	    tmp.geometry = new Object();
-	    tmp.geometry.boundingSphere = new Object();
-	    tmp.geometry.boundingSphere.radius = myRadius;
-	    tmp.position = controls.getObject().position.clone()
-	    tmp.position.y -= (myRadius/2);
+	    if(objects[i].geometry.name != "bullet"){
+		objects[i].lookAt(-10000000000,0,0)
+	    }
 	    if(spheresIntersect(objects[i], tmp)){
 		score = 0;
 		document.cookie = "topScore=" + topScore;
@@ -505,6 +510,9 @@ function animate() {
 
 		}
 
+	    }
+	    if(objects[i].geometry.name != "bullet"){
+		objects[i].lookAt(controls.getObject().position)
 	    }
 	}
 	if ( controls.getObject().position.y < 10 ) {
