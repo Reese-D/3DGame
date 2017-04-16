@@ -539,6 +539,7 @@ function animate() {
         bullet[0].velocity.y = 0;
         bullet[0].velocity.z = 0;
         bullet[0].bounce = 0;
+        bullet[0].translateOnAxis(cameraDir, 10);
     }
     if(shot === true){
       //bullet[0].position.y = controls.getObject().position.y;
