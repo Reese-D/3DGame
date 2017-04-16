@@ -87,6 +87,7 @@ var moveRight = false;
 var canJump = false;
 var shoot = false;
 var shot = false;
+var isHit = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 
@@ -182,12 +183,12 @@ function init() {
 
     //create eye
     //makeEye(translation axis, rotation axis, translation, rotation, texture, size, vertices, velocity)
-    makeEye( new THREE.Vector3(1, 1, 0), new THREE.Vector3(0,0,0), 100, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(-10, 140, 0));
+    makeEye( new THREE.Vector3(1, 1, 0), new THREE.Vector3(0,0,0), 100, 0, "js/textures/eye1.jpg", 10, 20, new THREE.Vector3(-10, 140, 0));
     makeEye( new THREE.Vector3(-1, 1, 0), new THREE.Vector3(0,0,0), 100, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 150,0));
-    makeEye( new THREE.Vector3(-0.5, 1, 0.5), new THREE.Vector3(0,0,0), 50, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(-50, 140,0));
-    makeEye( new THREE.Vector3(0.5, 1, 0.5), new THREE.Vector3(0,0,0), 70, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(-22, 40, 22));
+    makeEye( new THREE.Vector3(-0.5, 1, 0.5), new THREE.Vector3(0,0,0), 50, 0, "js/textures/eye3.jpg", 10, 20, new THREE.Vector3(-50, 140,0));
+    makeEye( new THREE.Vector3(0.5, 1, 0.5), new THREE.Vector3(0,0,0), 70, 0, "js/textures/eye4.jpg", 10, 20, new THREE.Vector3(-22, 40, 22));
     makeEye( new THREE.Vector3(-1, 1, -1), new THREE.Vector3(0,0,0), 115, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 200, -25));
-    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(50, 100, 30));
+    makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye3.jpg", 10, 20, new THREE.Vector3(50, 100, 30));
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -236,7 +237,8 @@ function makePlane(offset, rot, tex){
     scene.add( plane )
 }
 
-function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity){
+function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity, isBullet = true){
+    var isBullet = false;
     var eyeTex = new THREE.TextureLoader().load(tex, THREE.SphericalRefractionMapping);
     geometry = new THREE.SphereGeometry(radius, vertices, vertices);
     // modify UVs to accommodate MatCap texture
@@ -271,6 +273,8 @@ function makeEye(tranAxis, rotAxis, offset, rot, tex, radius, vertices, velocity
     eyeball.velocity = velocity
     eyeball.bounce = velocity.y;
     if(tex == "js/textures/bullet.jpg"){
+  isBullet = true;
+  eyeball.geometry.name = "bullet";
 	bullet.push(eyeball);
   objects.push(eyeball);
     }else{
@@ -313,15 +317,29 @@ function normalizedVector(v){
     return new THREE.Vector3(v.x / max, v.y / max, v.z/max);
 }
 
-function split(eyeObj){
-  console.log(eyeObj);
-  if (eyeObj.geometry.boundingSphere.radius > 5){
+function split(eyeObj, bulletIndex, eyeIndex){
+  if (eyeObj.geometry.boundingSphere.radius > 8){
     var x = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
     var y = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
     var z = Math.floor(Math.random() * 1500 / (eyeObj.geometry.boundingSphere.radius / 2));
-    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 100, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(x, y, z));
-    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 200, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x,-y,-z));
-
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(x, y, z));
+    objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateY(eyeObj.position.y + eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
+    makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x,-y,-z));
+    objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateY(eyeObj.position.y + eyeObj.geometry.boundingSphere.radius/2);
+    objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
+    scene.remove(objects[eyeIndex]);
+    scene.remove(objects[bulletIndex]);
+    if(bulletIndex < eyeIndex){
+      objects.splice(eyeIndex,1)[0];
+      objects.splice(bulletIndex,1)[0];
+    }else{
+      objects.splice(bulletIndex,1)[0];
+      objects.splice(eyeIndex,1)[0];
+    }
+    bullet.splice(0,1)[0];
   }
 }
 
@@ -418,23 +436,33 @@ function animate() {
 		    continue;
 		}
 		if(spheresIntersect(objects[i], objects[j])){
-		    var m1 = objects[i].geometry.boundingSphere.radius
-		    var m2 = objects[j].geometry.boundingSphere.radius
-		    var v1i = objects[i].velocity.clone()
-		    var v2i = objects[j].velocity.clone()
+        if(objects[i].geometry.name === "bullet"){
+          shoot = false;
+          shot = false;
+          split(objects[j], i, j);
+        }else if(objects[j].geometry.name === "bullet"){
+          shoot = false;
+          shot = false;
+          split(objects[i], j, i);
+        }else{
+          var m1 = objects[i].geometry.boundingSphere.radius
+          var m2 = objects[j].geometry.boundingSphere.radius
+          var v1i = objects[i].velocity.clone()
+          var v2i = objects[j].velocity.clone()
 
-		    var p1 = v1i.clone().multiplyScalar(m1 * 2)
-		    var p2 = v2i.clone().multiplyScalar(m2)
-		    var p3 = v2i.clone().multiplyScalar(m1)
-		    var v2f = p1.add(p2).sub(p3).divideScalar(m1 + m2)
+          var p1 = v1i.clone().multiplyScalar(m1 * 2)
+          var p2 = v2i.clone().multiplyScalar(m2)
+          var p3 = v2i.clone().multiplyScalar(m1)
+          var v2f = p1.add(p2).sub(p3).divideScalar(m1 + m2)
 
-		    var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
-		    //console.log("initial velocity of 1: ", objects[i].velocity)
-		    //console.log("initial velocity of 2: ", objects[j].velocity)
-		    objects[i].velocity = v1f
-		    objects[j].velocity = v2f
-		    //console.log("final velocity of 1: ", objects[i].velocity)
-		    //console.log("final velocity of 2: ", objects[j].velocity)
+          var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
+          //console.log("initial velocity of 1: ", objects[i].velocity)
+          //console.log("initial velocity of 2: ", objects[j].velocity)
+          objects[i].velocity = v1f
+          objects[j].velocity = v2f
+          //console.log("final velocity of 1: ", objects[i].velocity)
+          //console.log("final velocity of 2: ", objects[j].velocity)
+        }
 		}
 
 	    }
