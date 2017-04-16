@@ -89,7 +89,7 @@ var shoot = false;
 var shot = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
-p
+
 function init() {
 
     camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1500 );
@@ -263,13 +263,6 @@ function makeEye(axis1, axis2, offset, rot, tex, radius, vertices, velocity){
     material = new THREE.MeshPhongMaterial({map: eyeTex});
     var eyeball = new THREE.Mesh( geometry, material );
     
-    eyeball.xRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(1,0,0), 0, radius+3);
-    eyeball.nxRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(-1,0,0), 0, radius+3);
-    eyeball.yRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,1,0), 0, radius+3);
-    eyeball.nyRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,-1,0), 0, radius+3);
-    eyeball.zRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,0,1), 0, radius+3);
-    eyeball.nzRay = new THREE.Raycaster(eyeball.position, new THREE.Vector3(0,0,-1), 0, radius+3);
-    
     eyeball.overdraw = true;
     eyeball.castShadow = true;
     eyeball.translateOnAxis(axis1, offset);
@@ -297,10 +290,9 @@ function onWindowResize() {
 }
 
 function spheresIntersect(sphere1, sphere2){
-
     var radiiSum = sphere1.geometry.boundingSphere.radius + sphere2.geometry.boundingSphere.radius;
-    var center1 = sphere1.geometry.boundingSphere.center;
-    var center2 = sphere2.geometry.boundingSphere.center;
+    var center1 = sphere1.position; 
+    var center2 = sphere2.position;
     if(center1.distanceTo(center2) < radiiSum){
 	return true;
     }
@@ -370,31 +362,67 @@ function animate() {
 
 	for(var i = 0; i < objects.length; i++){
 	    objects[i].velocity.y -= 9.8 * 10.0 * delta;
-	    //objects[i].velocity.y -= 1;
-	    //console.log(9.8 * 100.0 * delta);
 	    objects[i].translateX( objects[i].velocity.x * delta );
 	    objects[i].translateY( objects[i].velocity.y * delta );
 	    objects[i].translateZ( objects[i].velocity.z * delta );
-	    //console.log(objects[i].position.y);
 	    var radius = objects[i].geometry.boundingSphere.radius;
-	    if(objects[i].position.y - radius <= 0){
-	     	objects[i].velocity.y = objects[i].bounce;
-	    }
+	    // if(objects[i].position.y - radius <= 0){
+	    // 	objects[i].position.y += 2;
+	    //  	objects[i].velocity.y *= -1;
+	    // 	//objects[i].bounce;
+	    // }
 	    var currObj = objects.splice(i, 1)[0];
+
+	    
 	    
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
+		if(currObj.velocity.x < 0){
+		    currObj.position.x += 2;
+		}else{
+		    currObj.position.x -= 2;
+		}
 		currObj.velocity.x *= -1
 	    }
-	    if(currObj.position.y + radius > wallDist || currObj.position.y - radius < -wallDist){
+	    if(currObj.position.y + radius > wallDist || currObj.position.y - radius <= 0){//currObj.position.y - radius < -wallDist){
+		if(currObj.velocity.y < 0){
+		    currObj.position.y += 2;
+		}else{
+		    currObj.position.y -= 2;
+		}
 		currObj.velocity.y *= -1
+
 	    }
 	    if(currObj.position.z + radius > wallDist || currObj.position.z - radius < -wallDist){
+		if(currObj.velocity.z < 0){
+		    currObj.position.z += 2;
+		}else{
+		    currObj.position.z -= 2;
+		}
 		currObj.velocity.z *= -1
 	    }
 	    objects.splice(i, 0, currObj);
 	    for(var j = i; j < objects.length; j++){
 		if(i == j){
 		    continue;
+		}
+		if(spheresIntersect(objects[i], objects[j])){
+		    var m1 = objects[i].geometry.boundingSphere.radius
+		    var m2 = objects[j].geometry.boundingSphere.radius
+		    var v1i = objects[i].velocity.clone()
+		    var v2i = objects[j].velocity.clone()
+
+		    var p1 = v1i.clone().multiplyScalar(m1 * 2)
+		    var p2 = v2i.clone().multiplyScalar(m2)
+		    var p3 = v2i.clone().multiplyScalar(m1)
+		    var v2f = p1.add(p2).sub(p3).divideScalar(m1 + m2)
+		    
+		    var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
+		    //console.log("initial velocity of 1: ", objects[i].velocity)
+		    //console.log("initial velocity of 2: ", objects[j].velocity)
+		    objects[i].velocity = v1f
+		    objects[j].velocity = v2f
+		    //console.log("final velocity of 1: ", objects[i].velocity)
+		    //console.log("final velocity of 2: ", objects[j].velocity)
 		}
 		
 	    }
