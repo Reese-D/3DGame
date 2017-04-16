@@ -99,6 +99,7 @@ scoreboard.style.position = 'absolute';
 scoreboard.style.width = 100;
 scoreboard.style.height = 100;
 //scoreboard.style.backgroundColor = "blue";
+scoreboard.style.color = "gray"
 scoreboard.style.top = 20 + 'px';
 scoreboard.style.left = 20 + 'px';
 document.body.appendChild(scoreboard);
@@ -106,6 +107,8 @@ document.body.appendChild(scoreboard);
 var score = 0
 
 function init() {
+    wallDist = 400
+    
     topScore = Number(getCookieValue("topScore"))
     if(topScore == undefined){
 	topScore = 0
@@ -119,9 +122,11 @@ function init() {
     scene = new THREE.Scene();
     //scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
 
-    var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-    light.position.set( 0.5, 1, 0.75 );
+    var light = new THREE.PointLight(0xffffff, 1, 0, 1  );
+    var ambient = new THREE.AmbientLight(0xffffff, 0.2);
+    light.position.set( 0, wallDist, 0);
     scene.add( light );
+    scene.add(ambient)
 
     controls = new THREE.PointerLockControls( camera );
     scene.add( controls.getObject() );
@@ -187,7 +192,7 @@ function init() {
     document.addEventListener( 'keyup', onKeyUp, false );
 
     raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, 1, 0 ), 0, myRadius  );
-    wallDist = 400
+
 
     //floor
     makePlane(0, - Math.PI/2, "js/textures/floor.jpg");
@@ -389,18 +394,18 @@ function animate() {
 	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 	if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
-  if(controls.getObject().position.x + 10 > wallDist){
-    controls.getObject().position.x -= 1;
-  }
-  if(controls.getObject().position.x -10 < -wallDist){
-    controls.getObject().position.x += 1;
-  }
-  if(controls.getObject().position.z + 10 > wallDist){
-    controls.getObject().position.z -= 1;
-  }
-  if(controls.getObject().position.z -10 < -wallDist){
-    controls.getObject().position.z += 1;
-  }
+	if(controls.getObject().position.x + 10 > wallDist){
+	    controls.getObject().position.x -= 1;
+	}
+	if(controls.getObject().position.x -10 < -wallDist){
+	    controls.getObject().position.x += 1;
+	}
+	if(controls.getObject().position.z + 10 > wallDist){
+	    controls.getObject().position.z -= 1;
+	}
+	if(controls.getObject().position.z -10 < -wallDist){
+	    controls.getObject().position.z += 1;
+	}
 
 
 	if ( moveForward ) velocity.z -= 400.0 * delta;
@@ -412,13 +417,18 @@ function animate() {
 	controls.getObject().translateX( velocity.x * delta );
 	controls.getObject().translateY( velocity.y * delta );
 	controls.getObject().translateZ( velocity.z * delta );
+
+	var tmp = new Object();
+	tmp.geometry = new Object();
+	tmp.geometry.boundingSphere = new Object();
+	tmp.geometry.boundingSphere.radius = myRadius;
+	tmp.position = controls.getObject().position.clone()
+	tmp.position.y -= (myRadius/2);
+
 	for(var i = 0; i < objects.length; i++){
-	    var tmp = new Object();
-	    tmp.geometry = new Object();
-	    tmp.geometry.boundingSphere = new Object();
-	    tmp.geometry.boundingSphere.radius = myRadius;
-	    tmp.position = controls.getObject().position.clone()
-	    tmp.position.y -= (myRadius/2);
+	    if(objects[i].geometry.name != "bullet"){
+		objects[i].lookAt(-10000000000,0,0)
+	    }
 	    if(spheresIntersect(objects[i], tmp)){
 		score = 0;
 		document.cookie = "topScore=" + topScore;
@@ -500,6 +510,9 @@ function animate() {
 
 		}
 
+	    }
+	    if(objects[i].geometry.name != "bullet"){
+		objects[i].lookAt(controls.getObject().position)
 	    }
 	}
 	if ( controls.getObject().position.y < 10 ) {
