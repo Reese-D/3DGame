@@ -430,10 +430,33 @@ function animate() {
 		    continue;
 		}
 		if(spheresIntersect(objects[i], objects[j])){
+
+		    		    
+		    // var a1 = objects[i].position.angleTo(objects[j].position)
+		    // var v1i = objects[i].velocity.clone()
+		    // var max1 = vectorMax(v1i)
+		    // var norm1 = normalizedVector(v1i)
+		    // v1i.applyAxisAngle(norm1, max1)
+
+		    var collision1 = objects[i].position.clone().sub(objects[j].position)
+		    var dot1 = objects[i].velocity.clone().normalize().dot(collision1.clone().normalize())
+		    var v1i = collision1.clone().normalize().multiplyScalar(dot1 * objects[i].velocity.length())
+		    
+		    var collision2 = objects[j].position.clone().sub(objects[i].position)
+		    var dot2 = objects[j].velocity.clone().normalize().dot(collision2.clone().normalize())
+		    var v2i = collision2.clone().normalize().multiplyScalar(dot2 * objects[j].velocity.length())
+		    console.log(v2i)
+		    // var a2 = objects[j].position.angleTo(objects[i].position)		    
+		    // var v2i = objects[j].velocity.clone()
+		    // var max2 = vectorMax(v2i)
+		    // var norm2 = normalizedVector(v2i)
+		    // v1i.applyAxisAngle(norm2, max2)
+
+		    objects[i].velocity.sub(v1i);
+		    objects[j].velocity.sub(v2i);
+		    
 		    var m1 = objects[i].geometry.boundingSphere.radius
 		    var m2 = objects[j].geometry.boundingSphere.radius
-		    var v1i = objects[i].velocity.clone()
-		    var v2i = objects[j].velocity.clone()
 
 		    var p1 = v1i.clone().multiplyScalar(m1 * 2)
 		    var p2 = v2i.clone().multiplyScalar(m2)
@@ -443,8 +466,8 @@ function animate() {
 		    var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
 		    //console.log("initial velocity of 1: ", objects[i].velocity)
 		    //console.log("initial velocity of 2: ", objects[j].velocity)
-		    objects[i].velocity = v1f
-		    objects[j].velocity = v2f
+		    objects[i].velocity.add(v1f)
+		    objects[j].velocity.add(v2f)
 		    //console.log("final velocity of 1: ", objects[i].velocity)
 		    //console.log("final velocity of 2: ", objects[j].velocity)
 		}
