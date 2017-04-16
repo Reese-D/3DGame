@@ -4,6 +4,7 @@ var geometry, material, mesh;
 var controls;
 
 var objects = [];
+var bullet = [];
 var structures = [];
 var raycaster;
 
@@ -84,7 +85,8 @@ var moveBackward = false;
 var moveLeft = false;
 var moveRight = false;
 var canJump = false;
-
+var shoot = false;
+var shot = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 p
@@ -125,10 +127,10 @@ function init() {
 	    moveRight = true;
 	    break;
 
-	case 32: // space
-	    if ( canJump === true ) velocity.y += 350;
-	    canJump = false;
-	    break;
+	    //case 32: // space
+	    //    if ( canJump === true ) velocity.y += 350;
+	    //    canJump = false;
+	    //    break;
 
 	}
 
@@ -158,6 +160,9 @@ function init() {
 	    moveRight = false;
 	    break;
 
+	case 32: //space
+	    shoot = true;
+	    break;
 	}
 
     };
@@ -189,6 +194,7 @@ function init() {
     makeEye( new THREE.Vector3(0.5, 1, 0.5), new THREE.Vector3(0,0,0), 70, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(-22, 40, 22));
     makeEye( new THREE.Vector3(-1, 1, -1), new THREE.Vector3(0,0,0), 115, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(10, 200, -25));
     makeEye( new THREE.Vector3(-1, 1, 1), new THREE.Vector3(0,0,0), 200, 0, "js/textures/eye2.jpg", 10, 20, new THREE.Vector3(50, 100, 30));
+    makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), 20, 0, "js/textures/bullet.jpg", .2, 100,  new THREE.Vector3(50, 100, 30));
 
 
     geometry = new THREE.BoxGeometry( 20, 20, 20 );
@@ -271,7 +277,11 @@ function makeEye(axis1, axis2, offset, rot, tex, radius, vertices, velocity){
     scene.add( eyeball );
     eyeball.velocity = velocity
     eyeball.bounce = velocity.y;
-    objects.push(eyeball);
+    if(tex == "js/textures/bullet.jpg"){
+	bullet.push(eyeball);
+    }else{
+	objects.push(eyeball);
+    }
 }
 
 
@@ -314,6 +324,9 @@ function animate() {
 
     requestAnimationFrame( animate );
 
+    var cameraDir = new THREE.Vector3();
+    var shotDir = new THREE.Vector3();
+    camera.getWorldDirection( cameraDir);
     if ( controlsEnabled ) {
 	raycaster.ray.origin.copy( controls.getObject().position );
 	raycaster.ray.origin.y -= 10;
@@ -337,7 +350,6 @@ function animate() {
 
 	velocity.x -= velocity.x * 10.0 * delta;
 	velocity.z -= velocity.z * 10.0 * delta;
-
 	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
 	if ( moveForward ) velocity.z -= 400.0 * delta;
@@ -369,7 +381,7 @@ function animate() {
 	     	objects[i].velocity.y = objects[i].bounce;
 	    }
 	    var currObj = objects.splice(i, 1)[0];
-	    	    
+	    
 	    // if(currObj.zRay.intersectObjects(objects).length > 0 || currObj.zRay.intersectObjects(structures).length > 0){
 	    // 	currObj.velocity.z *= -1;
 	    // 	currObj.position.z -= 1;
@@ -419,19 +431,29 @@ function animate() {
 	    //console.log(diff);
 
 	}
-	
 	if ( controls.getObject().position.y < 10 ) {
-
 	    velocity.y = 0;
 	    controls.getObject().position.y = 10;
-	    
 	    canJump = true;
-
 	}
-
 	prevTime = time;
-
     }
+    if(shoot === true && shot === false){
+        shotDir = cameraDir;
+        shoot = false;
+        shot = true;
+    }
+    if(shot === true){
+        bullet[0].translateOnAxis(cameraDir, 2);
+    }else{
+	bullet[0].position.x = controls.getObject().position.x;
+	bullet[0].position.y = controls.getObject().position.y;
+	bullet[0].position.z = controls.getObject().position.z;
+	bullet[0].translateOnAxis(cameraDir, 3);
+    }
+    console.log(shoot);
+    console.log(shot);
+
 
     renderer.render( scene, camera );
 
