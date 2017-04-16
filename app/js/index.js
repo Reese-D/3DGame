@@ -297,10 +297,9 @@ function onWindowResize() {
 }
 
 function spheresIntersect(sphere1, sphere2){
-
     var radiiSum = sphere1.geometry.boundingSphere.radius + sphere2.geometry.boundingSphere.radius;
-    var center1 = sphere1.geometry.boundingSphere.center;
-    var center2 = sphere2.geometry.boundingSphere.center;
+    var center1 = sphere1.position;
+    var center2 = sphere2.position;
     if(center1.distanceTo(center2) < radiiSum){
 	return true;
     }
@@ -387,64 +386,70 @@ function animate() {
       if(bullet.length > 0){bullet[0].velocity.y = 0;}
 	    //objects[i].velocity.y -= 1;
 	    //console.log(9.8 * 100.0 * delta);
+
 	    objects[i].translateX( objects[i].velocity.x * delta );
 	    objects[i].translateY( objects[i].velocity.y * delta );
 	    objects[i].translateZ( objects[i].velocity.z * delta );
-	    //console.log(objects[i].position.y);
 	    var radius = objects[i].geometry.boundingSphere.radius;
-	    if(objects[i].position.y - radius <= 0){
-	     	objects[i].velocity.y = objects[i].bounce;
-	    }
+	    // if(objects[i].position.y - radius <= 0){
+	    // 	objects[i].position.y += 2;
+	    //  	objects[i].velocity.y *= -1;
+	    // 	//objects[i].bounce;
+	    // }
 	    var currObj = objects.splice(i, 1)[0];
 
-	    // if(currObj.zRay.intersectObjects(objects).length > 0 || currObj.zRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.z *= -1;
-	    // 	currObj.position.z -= 1;
-	    // }
-
-
-	    // if(currObj.nzRay.intersectObjects(objects).length > 0 || currObj.nzRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.z *= -1;
-	    // 	currObj.position.z += 1;
-	    // }
-
-	    // if(currObj.yRay.intersectObjects(objects).length > 0 || currObj.yRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.y *= -1;
-	    // 	currObj.position.y -= 1;
-	    // }
-
-
-	    // if(currObj.nyRay.intersectObjects(objects).length > 0 || currObj.nyRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.y *= -1;
-	    // 	currObj.position.y += 1;
-	    // }
-
-
-	    // if(currObj.xRay.intersectObjects(objects).length > 0 || currObj.xRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.x *= -1;
-	    // 	currObj.position.x -= 1;
-	    // }
-
-
-	    // if(currObj.nxRay.intersectObjects(objects).length > 0 || currObj.nxRay.intersectObjects(structures).length > 0){
-	    // 	currObj.velocity.x *= -1;
-	    // 	currObj.position.x += 1;
-	    //}
 	    if(currObj.position.x + radius > wallDist || currObj.position.x - radius < -wallDist){
+		if(currObj.velocity.x < 0){
+		    currObj.position.x += 2;
+		}else{
+		    currObj.position.x -= 2;
+		}
 		currObj.velocity.x *= -1
 	    }
-	    if(currObj.position.y + radius > wallDist || currObj.position.y - radius < -wallDist){
+	    if(currObj.position.y + radius > wallDist || currObj.position.y - radius <= 0){//currObj.position.y - radius < -wallDist){
+		if(currObj.velocity.y < 0){
+		    currObj.position.y += 2;
+		}else{
+		    currObj.position.y -= 2;
+		}
 		currObj.velocity.y *= -1
+
 	    }
 	    if(currObj.position.z + radius > wallDist || currObj.position.z - radius < -wallDist){
+		if(currObj.velocity.z < 0){
+		    currObj.position.z += 2;
+		}else{
+		    currObj.position.z -= 2;
+		}
 		currObj.velocity.z *= -1
 	    }
 	    objects.splice(i, 0, currObj);
-	    //var objectRay = THREE.Raycaster(objects[i].position, normalizedVector(objects[i].velocity), 0, radius+1);
-	    //var collisions =
-	    //var diff = new THREE.Vector3(100, 200, 300).sub(new THREE.Vector3(100, 210, 290));
-	    //console.log(diff);
 
+	    for(var j = i; j < objects.length; j++){
+		if(i == j){
+		    continue;
+		}
+		if(spheresIntersect(objects[i], objects[j])){
+		    var m1 = objects[i].geometry.boundingSphere.radius
+		    var m2 = objects[j].geometry.boundingSphere.radius
+		    var v1i = objects[i].velocity.clone()
+		    var v2i = objects[j].velocity.clone()
+
+		    var p1 = v1i.clone().multiplyScalar(m1 * 2)
+		    var p2 = v2i.clone().multiplyScalar(m2)
+		    var p3 = v2i.clone().multiplyScalar(m1)
+		    var v2f = p1.add(p2).sub(p3).divideScalar(m1 + m2)
+
+		    var v1f = v2f.clone().sub(v1i.clone()).add(v2i.clone());
+		    //console.log("initial velocity of 1: ", objects[i].velocity)
+		    //console.log("initial velocity of 2: ", objects[j].velocity)
+		    objects[i].velocity = v1f
+		    objects[j].velocity = v2f
+		    //console.log("final velocity of 1: ", objects[i].velocity)
+		    //console.log("final velocity of 2: ", objects[j].velocity)
+		}
+
+	    }
 	}
 	if ( controls.getObject().position.y < 10 ) {
 	    velocity.y = 0;
@@ -457,7 +462,9 @@ function animate() {
         shotDir = cameraDir;
         shoot = false;
         shot = true;
-        makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), -10, 0, "js/textures/bullet.jpg", 3, 100,  new THREE.Vector3(0,0,0));
+        if(bullet.length < 1){
+          makeEye( new THREE.Vector3(0, 1, 0), new THREE.Vector3(0,0,0), -100, 0, "js/textures/bullet.jpg", 3, 100,  new THREE.Vector3(0,0,0));
+        }
         bullet[0].position.x = controls.getObject().position.x;
       	bullet[0].position.y = controls.getObject().position.y;
       	bullet[0].position.z = controls.getObject().position.z;
@@ -465,7 +472,7 @@ function animate() {
         bullet[0].velocity.y = 0;
         bullet[0].velocity.z = 0;
         bullet[0].bounce = 0;
-        split(objects[0]);
+        //split(objects[0]);
     }
     if(shot === true){
       //bullet[0].position.y = controls.getObject().position.y;
