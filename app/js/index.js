@@ -1,4 +1,15 @@
-
+/*
+ * Created by Reese and Miles De Wind
+ *
+ * First Person Movement utilized code from Mr Doob's github 
+ * https://github.com/mrdoob/three.js/tree/master/examples/js/controls
+ * specifically the PointerLockControls & First Person Controls
+ *
+ * A game in which the player attempts to shoot down a number of bouncing eyes.
+ * These eyes split into four smaller copies when hit until they are of
+ * a sufficiently small size to be eliminated. If struck by one of these
+ * eyes the player is eliminated. Each eye hit yields one point.
+ */
 var camera, scene, renderer;
 var geometry, material, mesh;
 var controls;
@@ -341,24 +352,24 @@ function split(eyeObj, bulletIndex, eyeIndex){
 	var z = eyeObj.velocity.z * 2;
 
 	makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(x, y, z));
-	objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2 + 2);
 	objects[objects.length-1].translateY(eyeObj.position.y);
-	objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2 + 2);
 
 	makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x, y,-z));
-	objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2 - 2);
 	objects[objects.length-1].translateY(eyeObj.position.y);
-	objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2 - 2);
 
 	makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(-x, y,+z));
-	objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateX(eyeObj.position.x - eyeObj.geometry.boundingSphere.radius/2 - 2);
 	objects[objects.length-1].translateY(eyeObj.position.y);
-	objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateZ(eyeObj.position.z + eyeObj.geometry.boundingSphere.radius/2 + 2);
 
 	makeEye( new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,0), 0, 0, eyeObj.material.map.image.currentSrc, eyeObj.geometry.boundingSphere.radius/2, 20, new THREE.Vector3(+x, y, -z));
-	objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateX(eyeObj.position.x + eyeObj.geometry.boundingSphere.radius/2 + 2);
 	objects[objects.length-1].translateY(eyeObj.position.y);
-	objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2);
+	objects[objects.length-1].translateZ(eyeObj.position.z - eyeObj.geometry.boundingSphere.radius/2 - 2);
     }
     scene.remove(objects[eyeIndex]);
     scene.remove(objects[bulletIndex]);
