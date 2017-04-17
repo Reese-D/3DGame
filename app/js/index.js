@@ -108,7 +108,29 @@ var score = 0
 
 function init() {
     wallDist = 400
-
+    var audio1 = new Audio("js/audio/CreepyDollMusic.mp3");
+    audio1.play();
+    audio1.addEventListener("ended", function(){
+     audio1.currentTime = 0;
+     audio1.play()
+   });
+    var laughing = "js/audio/EvilLaughingWoman.mp3";
+    var track = 1;
+    var audio2 = new Audio("js/audio/MaleLaugh.mp3");
+    audio2.play();
+    audio2.addEventListener("ended", function(){
+     audio2.currentTime = 0;
+     if(track === 1){
+       audio2.src = laughing;
+       track = 2;
+     }else if (track === 2){
+       audio2.src = "js/audio/ImNotMad.mp3";
+       track = 3;
+     }else{
+       audio2.src = "js/audio/MaleLaugh.mp3";
+     }
+     audio2.play();
+   });
     topScore = Number(getCookieValue("topScore"))
     if(topScore == undefined){
 	topScore = 0
@@ -331,6 +353,8 @@ function normalizedVector(v){
 
 function split(eyeObj, bulletIndex, eyeIndex){
     score += 1;
+    var audio4 = new Audio("js/audio/slice.mp3");
+    audio4.play();
     if(score > topScore){
 	topScore = score
     }
@@ -545,6 +569,8 @@ function animate() {
         bullet[0].velocity.z = 0;
         bullet[0].bounce = 0;
         bullet[0].translateOnAxis(cameraDir, 10);
+        var audio3 = new Audio("js/audio/bang.mp3");
+        audio3.play();
     }
     if(shot === true){
 	//bullet[0].position.y = controls.getObject().position.y;
