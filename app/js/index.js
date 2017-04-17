@@ -584,6 +584,7 @@ function animate() {
         audio3.play();
     }
     if(shot === true){
+	radius = bullet[0].geometry.boundingSphere.radius;
 	//bullet[0].position.y = controls.getObject().position.y;
 	if(bullet[0].position.x + radius +2 > wallDist || bullet[0].position.x - radius -2 < -wallDist){
 	    shoot = false;
