@@ -97,13 +97,15 @@ var moveForward = false;
 var moveBackward = false;
 var moveLeft = false;
 var moveRight = false;
+var moveUp = false;
+var moveDown = false;
 var canJump = false;
 var shoot = false;
 var shot = false;
 var isHit = false;
 var prevTime = performance.now();
 var velocity = new THREE.Vector3();
-
+var zRot = 0;
 
 scoreboard.style.position = 'absolute';
 //scoreboard.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
@@ -186,6 +188,22 @@ function init() {
 	case 68: // d
 	    moveRight = true;
 	    break;
+
+	case 50: // 2
+	    moveUp = true;
+	    break;
+
+	case 49: // 1
+	    moveDown = true;
+	    break;
+
+	case 81: // q
+	    zRot = -0.01;
+	    break;
+
+	case 69: // e
+	    zRot = 0.01;
+	    break;
 	}
 
     };
@@ -216,6 +234,22 @@ function init() {
 
 	case 32: //space
 	    shoot = true;
+	    break;
+
+	case 50: // 2
+	    moveUp = false;
+	    break;
+
+	case 49: // 1
+	    moveDown = false;
+	    break;
+
+	case 81: // q
+	    zRot = .0;
+	    break;
+
+	case 69: // e
+	    zRot = 0;
 	    break;
 	}
 
@@ -415,7 +449,7 @@ function getCookieValue(a) {
 function animate() {
 
     requestAnimationFrame( animate );
-
+    
     var cameraDir = new THREE.Vector3();
     var shotDir = new THREE.Vector3();
     camera.getWorldDirection( cameraDir );
@@ -430,7 +464,9 @@ function animate() {
 
 	velocity.x -= velocity.x * 10.0 * delta;
 	velocity.z -= velocity.z * 10.0 * delta;
-	velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
+	velocity.y -= velocity.y * 10.0 * delta;
+	//velocity.y = 0;
+
 	if(bullet.length > 0){bullet[0].velocity.y = 0;}
 
 	if(controls.getObject().position.x + 10 > wallDist){
@@ -446,12 +482,16 @@ function animate() {
 	    controls.getObject().position.z += 1;
 	}
 
-
+	
 	if ( moveForward ) velocity.z -= 400.0 * delta;
 	if ( moveBackward ) velocity.z += 400.0 * delta;
 
 	if ( moveLeft ) velocity.x -= 400.0 * delta;
 	if ( moveRight ) velocity.x += 400.0 * delta;
+
+	if ( moveUp ) velocity.y -= 400.0 * delta;
+	if ( moveDown ) velocity.y += 400.0 * delta;
+	
 
 	controls.getObject().translateX( velocity.x * delta );
 	controls.getObject().translateY( velocity.y * delta );
@@ -579,7 +619,7 @@ function animate() {
         bullet[0].velocity.y = 0;
         bullet[0].velocity.z = 0;
         bullet[0].bounce = 0;
-        bullet[0].translateOnAxis(cameraDir, 10);
+        bullet[0].translateOnAxis(cameraDir, 15);
         var audio3 = new Audio("js/audio/bang.mp3");
         audio3.play();
     }
